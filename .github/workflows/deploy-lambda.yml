@@ -1,4 +1,4 @@
-name: Deploy FastAPI to AWS Lambda with S3
+name: Deploy FastAPI to AWS Lambda with S3 Presigned URL (Enxuto)
 
 on:
   push:
@@ -32,16 +32,21 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}  # Região da Lambda
+        aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Upload zip to S3
       run: |
         aws s3 cp function.zip s3://${{ secrets.AWS_S3_BUCKET }}/function.zip --region ${{ secrets.AWS_BUCKET_REGION }}
 
-    - name: Deploy Lambda from S3
+    - name: Generate presigned URL
+      id: presign
+      run: |
+        URL=$(aws s3 presign s3://${{ secrets.AWS_S3_BUCKET }}/function.zip --expires-in 3600 --region ${{ secrets.AWS_BUCKET_REGION }})
+        echo "url=$URL" >> $GITHUB_OUTPUT
+
+    - name: Deploy Lambda from presigned URL
       run: |
         aws lambda update-function-code \
           --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
-          --s3-bucket ${{ secrets.AWS_S3_BUCKET }} \
-          --s3-key function.zip \
+          --zip-file "$URL" \
           --region ${{ secrets.AWS_REGION }}
