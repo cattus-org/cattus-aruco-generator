@@ -1,4 +1,4 @@
-name: Deploy to AWS Lambda
+name: Deploy FastAPI to AWS Lambda with S3
 
 on:
   push:
@@ -23,9 +23,6 @@ jobs:
         mkdir package
         pip install --upgrade pip
         pip install -r requirements.txt -t package/
-
-    - name: Prepare deployment package
-      run: |
         cp -r package/* .
         zip -r function.zip . -x '*.git*' '*.github*' '*.venv*' 'package/*'
 
@@ -36,6 +33,12 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Deploy to Lambda
+    - name: Upload to S3
+      run: aws s3 cp function.zip s3://${{ secrets.AWS_S3_BUCKET }}/function.zip
+
+    - name: Deploy function from S3
       run: |
-        aws lambda update-function-code --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --zip-file fileb://function.zip
+        aws lambda update-function-code \
+          --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+          --s3-bucket ${{ secrets.AWS_S3_BUCKET }} \
+          --s3-key function.zip
