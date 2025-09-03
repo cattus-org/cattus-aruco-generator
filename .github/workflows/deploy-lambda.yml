@@ -33,13 +33,13 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Upload zip to S3
+    - name: Upload zip to S3 (inside folder)
       run: |
-        aws s3 cp function.zip s3://${{ secrets.AWS_S3_BUCKET }}/function.zip
+        aws s3 cp function.zip s3://${{ secrets.AWS_S3_BUCKET }}/lambda-aruco-generator/function.zip
 
     - name: Deploy Lambda from S3
       run: |
         aws lambda update-function-code \
           --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
           --s3-bucket ${{ secrets.AWS_S3_BUCKET }} \
-          --s3-key function.zip
+          --s3-key lambda-aruco-generator/function.zip
