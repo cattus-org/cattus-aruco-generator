@@ -1,4 +1,4 @@
-name: Deploy FastAPI to AWS Lambda with S3 Presigned URL (Enxuto)
+name: Deploy FastAPI to AWS Lambda with S3
 
 on:
   push:
@@ -23,7 +23,6 @@ jobs:
         mkdir package
         pip install --upgrade pip
         pip install -r requirements.txt -t package/
-
         cp -r package/* .
         zip -r function.zip . -x '*.git*' '*.github*' '*.venv*' 'package/*'
 
@@ -36,17 +35,11 @@ jobs:
 
     - name: Upload zip to S3
       run: |
-        aws s3 cp function.zip s3://${{ secrets.AWS_S3_BUCKET }}/function.zip --region ${{ secrets.AWS_BUCKET_REGION }}
+        aws s3 cp function.zip s3://${{ secrets.AWS_S3_BUCKET }}/function.zip
 
-    - name: Generate presigned URL
-      id: presign
-      run: |
-        URL=$(aws s3 presign s3://${{ secrets.AWS_S3_BUCKET }}/function.zip --expires-in 3600 --region ${{ secrets.AWS_BUCKET_REGION }})
-        echo "url=$URL" >> $GITHUB_OUTPUT
-
-    - name: Deploy Lambda from presigned URL
+    - name: Deploy Lambda from S3
       run: |
         aws lambda update-function-code \
           --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
-          --zip-file "$URL" \
-          --region ${{ secrets.AWS_REGION }}
+          --s3-bucket ${{ secrets.AWS_S3_BUCKET }} \
+          --s3-key function.zip
