@@ -30,7 +30,7 @@ def create_app() -> FastAPI:
         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
         return img_str
 
-    @app.get("/generate", response_model=MarkerResponse)
+    @app.get("/generate", response_model=MarkerResponse, summary="Gera um marcador ArUco", description="Gera um marcador ArUco com os parâmetros fornecidos.")
     def generate_marker_get(request: MarkerRequest = Depends()):
         try:
             generator = ArucoGenerator()
@@ -46,7 +46,7 @@ def create_app() -> FastAPI:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Erro ao gerar marcador: {str(e)}")
 
-    @app.get("/generate_row")
+    @app.get("/generate_row", summary="Gera uma linha de marcadores ArUco", description="Gera uma linha de marcadores ArUco com os parâmetros fornecidos.")
     def generate_marker_row_get(request: MarkerRowRequest = Depends()):
         try:
             generator = ArucoGenerator()
@@ -63,11 +63,11 @@ def create_app() -> FastAPI:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Erro ao gerar linha de marcadores: {str(e)}")
 
-    @app.get("/health")
+    @app.get("/health", summary="Checagem de saúde da API", description="Retorna o status da API para checagem de saúde.")
     def health_check():
         return {"status": "ok"}
 
-    @app.get("/")
+    @app.get("/", summary="Raiz da API", description="Mensagem de boas-vindas da API ArUco Generator.")
     def root():
         return {"message": "ArUco Generator API - Use /generate endpoint to get markers."}
 
