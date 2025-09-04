@@ -23,8 +23,14 @@ jobs:
         mkdir package
         pip install --upgrade pip
         pip install -r requirements.txt -t package/
+
+        find package -type d -name "tests" -exec rm -rf {} +
+        find package -type d -name "__pycache__" -exec rm -rf {} +
+        find package -type d -name "*.dist-info" -exec rm -rf {} +
+        find package -type d -name "*.egg-info" -exec rm -rf {} +
+
         cp -r package/* .
-        zip -r function.zip . -x '*.git*' '*.github*' '*.venv*' 'package/*'
+        zip -r function.zip . -x '*.git*' '*.github*' 'package/*' '*.venv*'
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
