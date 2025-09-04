@@ -16,7 +16,9 @@ FROM python:3.10-slim
 
 WORKDIR /var/task
 
+RUN pip install --no-cache-dir awslambdaric
+
 COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
 COPY --from=builder /app /var/task
 
-CMD ["lambda_function.handler"]
+CMD ["python3", "-m", "awslambdaric", "lambda_function.handler"]
