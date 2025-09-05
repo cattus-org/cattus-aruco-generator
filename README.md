@@ -1,7 +1,6 @@
 # ArUco Generator API
 
 API FastAPI para gerar etiquetas ArUco personalizáveis e retornar as imagens em base64.
-Números de 0 a 49 são possiveis gerar atualmente.
 
 ## Descrição
 
@@ -11,68 +10,36 @@ Esta API permite gerar etiquetas ArUco via HTTP, útil para aplicações que pre
 
 - `GET /generate`: Gera um marcador ArUco com os parâmetros passados via query string.
   - Parâmetros:
-    - `id` (int, obrigatório): ID do marcador ArUco (0-49).
+    - `id` (int, obrigatório): ID do marcador ArUco (0-1023).
     - `size` (int, opcional, padrão=200): Tamanho do marcador em pixels (50-1000).
     - `margin_size` (int, opcional, padrão=10): Margem ao redor do marcador (0-100).
     - `border_bits` (int, opcional, padrão=1): Bits da borda do marcador (1-4).
   - Retorna: JSON com o ID e a imagem do marcador em base64.
 
+- `GET /generate_row`: Gera uma linha de marcadores ArUco com os parâmetros passados via query string.
+  - Parâmetros:
+    - `id` (int, obrigatório): ID do marcador ArUco (0-1023).
+    - `count` (int, opcional, padrão=10): Número de marcadores na linha (2-10).
+    - `size` (int, opcional, padrão=35): Tamanho do marcador em pixels (10-100).
+    - `margin_size` (int, opcional, padrão=10): Margem ao redor do marcador (0-100).
+    - `border_bits` (int, opcional, padrão=1): Bits da borda do marcador (1-4).
+  - Retorna: JSON com o ID, a contagem e a imagem da linha de marcadores em base64.
+
 - `GET /health`: Endpoint para checagem de saúde da API.
+
+- `GET /docs`: Endpoint para a documentação interativa da API gerada pelo Swagger UI.
 
 - `GET /`: Endpoint raiz com mensagem de boas-vindas.
 
 ## Como rodar localmente
 
 1. Clone o repositório
-2. Crie e ative um ambiente virtual Python
-3. Instale as dependências:
+2. Crie e ative um ambiente virtual
+3. Instale as dependências com `pip install -r requirements.txt`
+4. Execute a aplicação com `uvicorn lambda_function:app --reload`
 
-```bash
-pip install -r requirements.txt
-```
+## Observações
 
-4. Rode a aplicação localmente:
-
-```bash
-uvicorn lambda:app --reload
-```
-
-5. Acesse `http://localhost:8000/docs` para ver a documentação interativa.
-
-## Deploy na AWS Lambda
-
-A aplicação está preparada para rodar na AWS Lambda usando o adaptador Mangum.
-
-## Configuração do GitHub Actions para deploy automático
-
-O repositório contém um workflow GitHub Actions que realiza o deploy automático para a função Lambda na AWS.
-
-### Configurar secrets no GitHub
-
-No repositório GitHub, configure os seguintes secrets:
-
-- `AWS_ACCESS_KEY_ID`: sua chave de acesso AWS
-- `AWS_SECRET_ACCESS_KEY`: sua chave secreta AWS
-- `AWS_REGION`: região AWS
-- `LAMBDA_FUNCTION_NAME`: nome da função Lambda
-
-## Exemplo de uso
-
-Requisição GET para gerar um marcador com ID 23:
-
-```
-GET /generate?id=23
-```
-
-Resposta:
-
-```json
-{
-  "id": 23,
-  "image_base64": "iVBORw0KGgoAAAANSUhEUgAA..."
-}
-```
-
----
-
-API desenvolvida para facilitar a geração de marcadores ArUco para aplicações de visão computacional.
+- Os IDs dos marcadores para a rota `/generate` são de 0 a 1023.
+- Para a rota `/generate_row`, os IDs podem variar de 0 a 1023, e o número de marcadores na linha pode ser de 2 a 10.
+- Os tamanhos e margens possuem limites para evitar erros na geração das imagens.
